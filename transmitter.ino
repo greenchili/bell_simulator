@@ -9,7 +9,7 @@ Bell Transmitter with Potentiometer Selector (1–12)
 RF24 radio(7, 8); // CE, CSN
 
 const byte address[6] = "00001";
-char text[3]; // To hold up to "12" + null terminator
+char text[3]; // Can hold "12" + null terminator
 
 const int IRSensor = 2; // IR sensor on D2
 const int potPin = A0;
@@ -30,13 +30,15 @@ void setup() {
 }
 
 void loop() {
-  // Map potentiometer to bell number (1–12)
+  // Read potentiometer and map to bell number 1–12
   int potVal = analogRead(potPin); // 0–1023
-  int bellNum = map(potVal, 0, 1023, 1, 12);
+  int bellNum = map(potVal, 0, 1023, 1, 13); // Use 13 to include 12 in output
+  if (bellNum > 12) bellNum = 12; // Clamp just in case
 
-  // Convert number to ASCII string
-  snprintf(text, sizeof(text), "%d", bellNum); // e.g. "1", "10", etc.
+  // Convert bell number to ASCII string
+  snprintf(text, sizeof(text), "%d", bellNum); // e.g. "1", "12"
 
+  // Check IR sensor
   int sensorStatus = digitalRead(IRSensor);
   if (sensorStatus == 0 && (millis() - lastTrigger > triggerDelay)) {
     Serial.print("IR sensor triggered. Bell: ");
